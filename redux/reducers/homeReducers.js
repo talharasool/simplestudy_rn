@@ -1,14 +1,9 @@
-// homeReducer.js
-
-// Action types
 const TOGGLE_HOME_SCREEN = 'TOGGLE_HOME_SCREEN';
 
-// Initial state
 const initialState = {
   isActive: false,
 };
 
-// Reducer function
 const homeReducer = (state = initialState, action) => {
   switch (action.type) {
     case TOGGLE_HOME_SCREEN:
@@ -21,7 +16,6 @@ const homeReducer = (state = initialState, action) => {
   }
 };
 
-// Action creators
 export const toggleHomeScreen = () => ({
   type: TOGGLE_HOME_SCREEN,
 });

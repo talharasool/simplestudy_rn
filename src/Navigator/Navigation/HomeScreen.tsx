@@ -1,9 +1,9 @@
 import React from 'react';
 import {View, Text, Button, StyleSheet, Alert} from 'react-native';
 import {connect} from 'react-redux';
-import {toggleHomeScreen} from '../../../redux/reducers/homeReducers'; // Import the action creator
+import {toggleHomeScreen} from '../../../redux/reducers/homeReducers';
 
-const HomeScreen = ({isActive, toggleHomeScreen}) => {
+const HomeScreen = ({isActive, toggleHomeScreen}: any) => {
   const handleToggle = () => {
     toggleHomeScreen();
     if (!isActive) {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: {home: {isActive: any}}) => ({
   isActive: state.home.isActive,
 });
 

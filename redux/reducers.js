@@ -1,5 +1,3 @@
-// reducers.js
-
 import {combineReducers} from 'redux';
 import homeReducer from '../redux/reducers/homeReducers';
 import webViewReducer from '../redux/reducers/webViewReducers';
