@@ -1,11 +1,46 @@
-import React from 'react';
-import AppNavigator from './src/Navigator/AppNavigator'; // Import your AppNavigator
 
-const App = () => {
-  return <AppNavigator />;
-};
+import {setup} from 'react-native-iap';
+import {Provider} from 'react-redux';
+import store from './redux/store';
+import { useEffect } from 'react';
+import { notificationListener, requestUserPermission } from './src/utils/PushNotificationManager';
+import WebViewScreen from './src/Navigator/Navigation/WebViewScreen';
 
+setup({storekitMode: 'STOREKIT2_MODE'});
+  const App = () => {
+//below what you need to add
+
+useEffect(() => {
+  requestUserPermission()
+  notificationListener()
+}, []);
+
+
+    return (
+      <Provider store={store}>
+        <WebViewScreen></WebViewScreen>
+      </Provider>
+    );
+  };
 export default App;
+
+
+
+
+
+// import React from 'react';
+// import AppNavigator from './src/Navigator/AppNavigator'; // Import your AppNavigator
+
+// const App = () => {
+
+
+
+//   return <AppNavigator />;
+// };
+
+
+
+// export default App;
 
 // import React, {useRef, useState} from 'react';
 // import {View, Button, Platform, ScrollView, Text, Image} from 'react-native';

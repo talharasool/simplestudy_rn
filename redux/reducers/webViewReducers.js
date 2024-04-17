@@ -37,13 +37,9 @@ const webViewSlice = createSlice({
 export const sendReceiptToServer = createAsyncThunk(
   'payment/sendReceiptToServer',
   async (params, thunkAPI) => {
-    
-
     const dataParams = JSON.stringify({params});
-
     console.log("Send", params)
-    
-    const response = await http.post(APIURL.verifyPurchase, params);
+    const response = await http.post('https://simplestudy.cloud/pwa_api/verify_apple_purchase', params);
     if (response.data.success === false) {
       return thunkAPI.rejectWithValue(response.data);
     }

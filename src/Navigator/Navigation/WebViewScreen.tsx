@@ -4,6 +4,8 @@ import RNWebView, { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { initConnection, requestPurchase, useIAP } from 'react-native-iap';
 import { useDispatch } from 'react-redux';
 import { sendReceiptToServer } from '../../../redux/reducers/webViewReducers';
+import { encode } from 'base-64';
+import messaging from '@react-native-firebase/messaging';
 
 
 const WebViewScreen: React.FC = () => {
@@ -33,6 +35,7 @@ const WebViewScreen: React.FC = () => {
 
   useEffect(() => {
     initializeConnection();
+  
   }, []);
 
 
@@ -49,31 +52,38 @@ const WebViewScreen: React.FC = () => {
     }
   };
 
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
 
   const handlePurchase = async (customer : CustomerData) => {
     try {
       // Request purchase for the consumable item
       const purchase: any = await requestPurchase({ sku: customer.productId});
-      // console.log(purchase)
+       console.log(purchase)
 
       if (purchase){
         // const response = await dispatch(sendReceiptToServer(customer));
         const transtionID  = purchase.transactionId;
         const userId  = customer.customerId;
-        const receipt = JSON.stringify(purchase);
-      
+        const jsonData = JSON.stringify(purchase);
+        const receipt = encode(jsonData);
         const params = {
           'receipt-data': receipt,
           'user-id': userId,
           'transaction-id': transtionID,
-        };
-        
-        // const jsonString = JSON.stringify(params);
-        // console.log('Json String',jsonString)
-
+        }
+        // console.log(params)  
         return params;
 
-       
       }
     } catch (error) {
       console.log('Purchase error:', error);
@@ -89,7 +99,8 @@ const WebViewScreen: React.FC = () => {
       console.log(customerData)
 
       const apiParams = await handlePurchase(customerData)
-      const response = await dispatch(sendReceiptToServer(apiParams));
+
+       const response = await dispatch(sendReceiptToServer(apiParams));
 
       if (response && response.success) {
         // The response is successful
