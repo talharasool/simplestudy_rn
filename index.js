@@ -7,8 +7,19 @@ import {AppRegistry} from 'react-native';
 import App from './src/Navigator/Navigation/WebViewScreen';
 import {name as appName} from './app.json';
 import { withIAPContext } from 'react-native-iap';
-
 import {setup} from 'react-native-iap';
-setup({storekitMode: 'STOREKIT2_MODE'});
+import {Provider} from 'react-redux';
+import store from './redux/store';
 
-AppRegistry.registerComponent(appName, () => withIAPContext(App));
+setup({storekitMode: 'STOREKIT2_MODE'});
+  const myApp = () => {
+    return (
+      <Provider store={store}>
+        <App/>
+      </Provider>
+    );
+  };
+
+
+
+AppRegistry.registerComponent(appName, () => withIAPContext(myApp));

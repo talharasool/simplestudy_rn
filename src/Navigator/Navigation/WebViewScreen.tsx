@@ -2,12 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import { Alert, Platform, ScrollView } from 'react-native';
 import RNWebView, { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { initConnection, requestPurchase, useIAP } from 'react-native-iap';
+import { useDispatch } from 'react-redux';
+import { sendReceiptToServer } from '../../../redux/reducers/webViewReducers';
 
 
 const WebViewScreen: React.FC = () => {
   const webViewRef = useRef<RNWebView | null>(null);
 
-  const availablePlansArray: Array<string> = ['advancedyearlyplan','ultimatemonthlyplan','basicyearlyplan','ultimatemonthlyplan','advancedmonthlyplan','basicmonthlyplan'];
+  const availablePlansArray: Array<string> = ['advancedyearlyplan','ultimateyearlyplan','basicyearlyplan','ultimatemonthlyplan','advancedmonthlyplan','basicmonthlyplan'];
 
   const {
     connected,
@@ -25,6 +27,9 @@ const WebViewScreen: React.FC = () => {
     getAvailablePurchases,
     getPurchaseHistory,
   } = useIAP();
+
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     initializeConnection();
@@ -48,23 +53,54 @@ const WebViewScreen: React.FC = () => {
   const handlePurchase = async (customer : CustomerData) => {
     try {
       // Request purchase for the consumable item
-      const purchase = await requestPurchase({ sku: customer.productId });
-      console.log(purchase)
+      const purchase: any = await requestPurchase({ sku: customer.productId});
+      // console.log(purchase)
+
+      if (purchase){
+        // const response = await dispatch(sendReceiptToServer(customer));
+        const transtionID  = purchase.transactionId;
+        const userId  = customer.customerId;
+        const receipt = JSON.stringify(purchase);
       
+        const params = {
+          'receipt-data': receipt,
+          'user-id': userId,
+          'transaction-id': transtionID,
+        };
+        
+        // const jsonString = JSON.stringify(params);
+        // console.log('Json String',jsonString)
+
+        return params;
+
+       
+      }
     } catch (error) {
       console.log('Purchase error:', error);
-      Alert.alert('Purchase Error', 'There was an error processing your purchase.');
+     // Alert.alert('Purchase Error', 'There was an error processing your purchase.');
     }
   };
 
 
-  const handleWebViewMessageForSubscriptions = (event: WebViewMessageEvent) => {
+  const handleWebViewMessageForSubscriptions = async (event: WebViewMessageEvent) => {
     try {
       const { data } = event.nativeEvent;
       const customerData: CustomerData = JSON.parse(data);
       console.log(customerData)
 
-      handlePurchase(customerData)
+      const apiParams = await handlePurchase(customerData)
+      const response = await dispatch(sendReceiptToServer(apiParams));
+
+      if (response && response.success) {
+        // The response is successful
+        console.log('Response is successful:', response);
+      } else {
+        // Handle the case where the response is not successful
+        console.log('Response is not successful:', response);
+      }
+
+      // console.log("Api Params:", apiParams)
+
 
     } catch (error) {
       console.error('Error parsing message:', error);
