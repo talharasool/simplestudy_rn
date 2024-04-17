@@ -14,24 +14,9 @@ const webViewSlice = createSlice({
   name: 'webView',
   initialState,
   reducers: {
-    login: (state, action) => {
-      // Add your logic here if needed
-    },
+
   },
-  extraReducers: builder => {
-    builder
-      .addCase(sendReceiptToServer.pending, state => {
-        state.loading = 'pending';
-      })
-      .addCase(sendReceiptToServer.fulfilled, (state, action) => {
-        state.loading = 'idle';
-        // Update state with response data if needed
-      })
-      .addCase(sendReceiptToServer.rejected, (state, action) => {
-        state.loading = 'idle';
-        state.error = action.error.message;
-      });
-  },
+
 });
 
 export const sendReceiptToServer = createAsyncThunk(
@@ -46,7 +31,5 @@ export const sendReceiptToServer = createAsyncThunk(
     return response.data;
   },
 );
-
-export const { login } = webViewSlice.actions;
 
 export default webViewSlice.reducer;

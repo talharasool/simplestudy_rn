@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Alert, Platform, ScrollView } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import RNWebView, { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { initConnection, requestPurchase, useIAP } from 'react-native-iap';
 import { useDispatch } from 'react-redux';
@@ -7,35 +7,24 @@ import { sendReceiptToServer } from '../../../redux/reducers/webViewReducers';
 import { encode } from 'base-64';
 import messaging from '@react-native-firebase/messaging';
 
-
+import FullScreenActivityIndicator from '../../utils/FullScreenActivityIndicator';
 const WebViewScreen: React.FC = () => {
   const webViewRef = useRef<RNWebView | null>(null);
 
-  const availablePlansArray: Array<string> = ['advancedyearlyplan','ultimateyearlyplan','basicyearlyplan','ultimatemonthlyplan','advancedmonthlyplan','basicmonthlyplan'];
+  const availablePlansArray: Array<string> = ['advancedyearlyplan', 'ultimateyearlyplan', 'basicyearlyplan', 'ultimatemonthlyplan', 'advancedmonthlyplan', 'basicmonthlyplan'];
 
   const {
-    connected,
-    products,
-    promotedProductsIOS,
-    subscriptions,
-    purchaseHistory,
-    availablePurchases,
-    currentPurchase,
-    currentPurchaseError,
-    initConnectionError,
-    finishTransaction,
     getProducts,
-    getSubscriptions,
-    getAvailablePurchases,
-    getPurchaseHistory,
   } = useIAP();
+
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const dispatch = useDispatch();
 
   useEffect(() => {
     initializeConnection();
-  
+
   }, []);
 
 
@@ -57,23 +46,21 @@ const WebViewScreen: React.FC = () => {
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-  
+
     if (enabled) {
       console.log('Authorization status:', authStatus);
     }
   }
 
 
-  const handlePurchase = async (customer : CustomerData) => {
+  const handlePurchase = async (customer: CustomerData) => {
     try {
       // Request purchase for the consumable item
-      const purchase: any = await requestPurchase({ sku: customer.productId});
-       console.log(purchase)
-
-      if (purchase){
-        // const response = await dispatch(sendReceiptToServer(customer));
-        const transtionID  = purchase.transactionId;
-        const userId  = customer.customerId;
+      const purchase: any = await requestPurchase({ sku: customer.productId });
+      console.log(purchase)
+      if (purchase) {
+        const transtionID = purchase.transactionId;
+        const userId = customer.customerId;
         const jsonData = JSON.stringify(purchase);
         const receipt = encode(jsonData);
         const params = {
@@ -83,37 +70,46 @@ const WebViewScreen: React.FC = () => {
         }
         // console.log(params)  
         return params;
-
       }
     } catch (error) {
-      console.log('Purchase error:', error);
-     // Alert.alert('Purchase Error', 'There was an error processing your purchase.');
+      setIsLoading(false)
+      console.log(error);
+      const errorMessage = (error as Error).toString(); // Type assertion
+      console.log('Purchase error:', errorMessage);
+      if ((errorMessage) !== 'Error: User cancelled the purchase') {
+        Alert.alert('Purchase Error', 'There was an error processing your purchase.');
+      }
+     
     }
   };
 
 
   const handleWebViewMessageForSubscriptions = async (event: WebViewMessageEvent) => {
     try {
+      setIsLoading(true)
       const { data } = event.nativeEvent;
       const customerData: CustomerData = JSON.parse(data);
-      console.log(customerData)
-
       const apiParams = await handlePurchase(customerData)
-
-       const response = await dispatch(sendReceiptToServer(apiParams));
-
+    
+      if (apiParams){
+      const response = await dispatch(sendReceiptToServer(apiParams));
       if (response && response.success) {
         // The response is successful
         console.log('Response is successful:', response);
       } else {
         // Handle the case where the response is not successful
         console.log('Response is not successful:', response);
+        setIsLoading(false);
       }
+      }
+    
 
-      // console.log("Api Params:", apiParams)
+
 
 
     } catch (error) {
+
+      setIsLoading(false)
       console.error('Error parsing message:', error);
     }
   }
@@ -121,25 +117,39 @@ const WebViewScreen: React.FC = () => {
   //MARK: Original Link For Stagging ->   source={{uri: 'https://simplestudy.cloud/'}}
 
   return (
-    <ScrollView contentContainerStyle={{ flex: 1 }}>
-      <RNWebView
-        source={{ uri: 'https://simplestudy.cloud/subscription' }}
-        scalesPageToFit={false}
-        javaScriptEnabledAndroid={true}
-        setBuiltInZoomControls={false}
-        setDisplayZoomControls={false}
-        allowsZoom={false}
-        automaticallyAdjustContentInsets={false}
-        ref={webViewRef}
-        onMessage={handleWebViewMessageForSubscriptions}
-        pullToRefreshEnabled={true}
-        style={Platform.OS === 'ios' ? { marginTop: 50 } : {}}
-        allowsBackForwardNavigationGestures
-        userAgent="iPhone PWA"
-      />
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <View style={StyleSheet.absoluteFill}>
+        <RNWebView
+          source={{ uri: 'https://simplestudy.cloud/subscription' }}
+
+          scalesPageToFit={false}
+          javaScriptEnabledAndroid={true}
+          setBuiltInZoomControls={false}
+          setDisplayZoomControls={false}
+          allowsZoom={false}
+          automaticallyAdjustContentInsets={false}
+          ref={webViewRef}
+          onMessage={handleWebViewMessageForSubscriptions}
+          pullToRefreshEnabled={true}
+          style={Platform.OS === 'ios' ? { marginTop: 50 } : {}}
+          allowsBackForwardNavigationGestures
+          userAgent="iPhone PWA"
+        />
+      </View>
+      {isLoading && <FullScreenActivityIndicator />}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
 
 export default WebViewScreen;
 
