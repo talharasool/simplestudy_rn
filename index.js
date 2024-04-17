@@ -6,5 +6,9 @@ import {AppRegistry} from 'react-native';
 // If a user wants to use the WebView screen, then use:
 import App from './src/Navigator/Navigation/WebViewScreen';
 import {name as appName} from './app.json';
+import { withIAPContext } from 'react-native-iap';
 
-AppRegistry.registerComponent(appName, () => App);
+import {setup} from 'react-native-iap';
+setup({storekitMode: 'STOREKIT2_MODE'});
+
+AppRegistry.registerComponent(appName, () => withIAPContext(App));
