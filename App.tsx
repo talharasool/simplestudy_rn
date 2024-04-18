@@ -1,27 +1,27 @@
 
-import {setup} from 'react-native-iap';
-import {Provider} from 'react-redux';
+import { setup } from 'react-native-iap';
+import { Provider } from 'react-redux';
 import store from './redux/store';
 import { useEffect } from 'react';
 import { notificationListener, requestUserPermission } from './src/utils/PushNotificationManager';
 import WebViewScreen from './src/Navigator/Navigation/WebViewScreen';
 
-setup({storekitMode: 'STOREKIT2_MODE'});
-  const App = () => {
-//below what you need to add
+setup({storekitMode: 'STOREKIT1_MODE'});
+const App = () => {
+  //below what you need to add
 
-useEffect(() => {
-  requestUserPermission()
-  notificationListener()
-}, []);
+  useEffect(() => {
+    requestUserPermission()
+    notificationListener()
+  }, []);
 
 
-    return (
-      <Provider store={store}>
-        <WebViewScreen></WebViewScreen>
-      </Provider>
-    );
-  };
+  return (
+    <Provider store={store}>
+      <WebViewScreen></WebViewScreen>
+    </Provider>
+  );
+};
 export default App;
 
 

@@ -1,25 +1,33 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import RNWebView, { WebView, WebViewMessageEvent } from 'react-native-webview';
-import { initConnection, requestPurchase, useIAP } from 'react-native-iap';
+import { IapAndroid, IapIos, getAvailablePurchases, getProducts, getReceiptIOS, initConnection, requestPurchase, useIAP } from 'react-native-iap';
 import { useDispatch } from 'react-redux';
 import { sendReceiptToServer } from '../../../redux/reducers/webViewReducers';
 import { encode } from 'base-64';
 import messaging from '@react-native-firebase/messaging';
-
 import FullScreenActivityIndicator from '../../utils/FullScreenActivityIndicator';
+import { encode as btoa } from 'base-64';
+import RNFetchBlob from 'rn-fetch-blob';
+import { TextEncoder } from 'text-encoding'
+
+import { Buffer } from "buffer";
 const WebViewScreen: React.FC = () => {
   const webViewRef = useRef<RNWebView | null>(null);
 
   const availablePlansArray: Array<string> = ['advancedyearlyplan', 'ultimateyearlyplan', 'basicyearlyplan', 'ultimatemonthlyplan', 'advancedmonthlyplan', 'basicmonthlyplan'];
-
   const {
-    getProducts,
+    connected,
+    subscriptions, //returns subscriptions for this app.
+    getSubscriptions, //Gets available subsctiptions for this app.
+    currentPurchase, //current purchase for the tranasction
+    finishTransaction,
+    purchaseHistory, //return the purchase history of the user on the device (sandbox user in dev)
+    getPurchaseHistory, //gets users purchase history
   } = useIAP();
 
+
   const [isLoading, setIsLoading] = useState(false);
-
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -57,18 +65,30 @@ const WebViewScreen: React.FC = () => {
     try {
       // Request purchase for the consumable item
       const purchase: any = await requestPurchase({ sku: customer.productId });
-      console.log(purchase)
+
+      await finishTransaction({purchase: purchase, isConsumable: true});
+      
+      const receipt = currentPurchase;
+      // console.log(receipt)
+
+      // console.log(receipt?.transactionReceipt)
+      const res: any = await IapIos.getReceiptIOS({ forceRefresh: false});
+
+      console.log('getReceiptIOS',res)
+      // console.log(purchase)
       if (purchase) {
         const transtionID = purchase.transactionId;
         const userId = customer.customerId;
         const jsonData = JSON.stringify(purchase);
-        const receipt = encode(jsonData);
+        //  const receipt = encode(jsonData);
+        //New 
+
         const params = {
-          'receipt-data': receipt,
+          'receipt-data': res,
           'user-id': userId,
           'transaction-id': transtionID,
         }
-        // console.log(params)  
+         console.log(params)  
         return params;
       }
     } catch (error) {
@@ -79,7 +99,7 @@ const WebViewScreen: React.FC = () => {
       if ((errorMessage) !== 'Error: User cancelled the purchase') {
         Alert.alert('Purchase Error', 'There was an error processing your purchase.');
       }
-     
+
     }
   };
 
@@ -90,19 +110,19 @@ const WebViewScreen: React.FC = () => {
       const { data } = event.nativeEvent;
       const customerData: CustomerData = JSON.parse(data);
       const apiParams = await handlePurchase(customerData)
-    
-      if (apiParams){
-      const response = await dispatch(sendReceiptToServer(apiParams));
-      if (response && response.success) {
-        // The response is successful
-        console.log('Response is successful:', response);
-      } else {
-        // Handle the case where the response is not successful
-        console.log('Response is not successful:', response);
-        setIsLoading(false);
+
+      if (apiParams) {
+        const response = await dispatch(sendReceiptToServer(apiParams));
+        if (response && response.success) {
+          // The response is successful
+          console.log('Response is successful:', response);
+        } else {
+          // Handle the case where the response is not successful
+          console.log('Response is not successful:', response.payload);
+          setIsLoading(false);
+        }
       }
-      }
-    
+
 
 
 
