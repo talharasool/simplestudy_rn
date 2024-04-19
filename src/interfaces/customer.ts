@@ -4,6 +4,12 @@ interface CustomerData {
     type: string;
   }
 
+  interface ParamsData {
+    customerId: string;
+    productId: string;
+    type: string;
+  }
+
 
   interface PurchaseData {
     appAccountToken: string;

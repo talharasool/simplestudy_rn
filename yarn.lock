@@ -7501,6 +7501,11 @@ react-native-buffer@^6.0.3:
     ieee754 "^1.2.1"
     react-native-fast-base64 "^0.1.1"
 
+react-native-device-info@^10.13.1:
+  version "10.13.1"
+  resolved "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-10.13.1.tgz"
+  integrity sha512-j/7Z+Yl9Cesjp8vKaVzbuJQKJSVs4ojXATt5WjwipZ0Ss0mBJjqtbc4x5dfZLmQ4y55VVa7c0v8KHca1iqY/TQ==
+
 react-native-document-picker@^9.1.1:
   version "9.1.1"
   resolved "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-9.1.1.tgz"
@@ -7539,6 +7544,11 @@ react-native-gesture-handler@^2.16.0:
     invariant "^2.2.4"
     lodash "^4.17.21"
     prop-types "^15.7.2"
+
+react-native-haptic-feedback@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmjs.org/react-native-haptic-feedback/-/react-native-haptic-feedback-2.2.0.tgz"
+  integrity sha512-3tqJOjCguWhIrX0nkURn4yw6kXdsSDjjrvZCRjKXYGlL28hdQmoW2okAHduDTD9FWj9lA+lHgwFWgGs4aFNN7A==
 
 react-native-iap@^12.13.1:
   version "12.13.1"
@@ -7604,7 +7614,7 @@ react-native-webview@^13.8.4:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
 
-react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", react-native@^0.73.6, "react-native@>=0.47.0 <1.0.0", react-native@>=0.57, react-native@>=0.65.1, react-native@>=0.69:
+react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", react-native@^0.73.6, "react-native@>=0.47.0 <1.0.0", react-native@>=0.57, react-native@>=0.60.0, react-native@>=0.65.1, react-native@>=0.69:
   version "0.73.6"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.73.6.tgz"
   integrity sha512-oqmZe8D2/VolIzSPZw+oUd6j/bEmeRHwsLn1xLA5wllEYsZ5zNuMsDus235ONOnCRwexqof/J3aztyQswSmiaA==
