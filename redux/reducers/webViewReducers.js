@@ -32,6 +32,20 @@ export const sendReceiptToServer = createAsyncThunk(
 );
 
 
+export const sendFCMToServer = createAsyncThunk(
+  'payment/sendFCMToServer',
+  async (params, thunkAPI) => {
+    const response = await http.post(APIURL.updateFCM, params);
+    console.log("Mine",response.data )
+    if (response.data === undefined) {
+      return thunkAPI.rejectWithValue(response.data);
+    }
+   
+    return response.data;
+  },
+);
+
+
 export const verifySandboxPurchase = createAsyncThunk(
   'payment/verifySandboxPurchase',
   async (params, thunkAPI) => {

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, DeviceEventEmitter, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import RNWebView, {  WebView, WebViewMessageEvent } from 'react-native-webview';
 import { getProducts, getReceiptIOS, initConnection, requestPurchase, useIAP, purchaseUpdatedListener, validateReceiptIos } from 'react-native-iap';
 import { useDispatch } from 'react-redux';
 import { sendReceiptToServer } from '../../../redux/reducers/webViewReducers';
 import FullScreenActivityIndicator from '../../utils/FullScreenActivityIndicator';
-import { APIURL } from '../../utils/apiUrl';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
+import DeviceInfo from 'react-native-device-info';
 
 const WebViewScreen: React.FC = () => {
   const webViewRef = useRef<RNWebView | null>(null);
@@ -22,7 +24,8 @@ const WebViewScreen: React.FC = () => {
 
   useEffect(() => {
     initializeConnection();
-
+    // getFCMToken()
+    // let deviceId = DeviceInfo.getUniqueId();
   }, []);
 
 
@@ -39,6 +42,12 @@ const WebViewScreen: React.FC = () => {
     }
   };
 
+
+   const getFCMToken = async () => {
+    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
+    console.log(fcmtoken)
+  };
+  
 
   const processPurchaseAsync = async (purchase: any, userId: string): Promise<{ [key: string]: string }> => {
     return new Promise((resolve) => {
@@ -62,6 +71,8 @@ const WebViewScreen: React.FC = () => {
       const purchase: any = await requestPurchase({ sku: customer.productId });
       const userId = customer.customerId;
       const params = await processPurchaseAsync(purchase, userId);
+
+    //MARK: -- This code is for testing purposes....
     //   const receiptBody =  await getReceiptIOS(purchase);
     //   const paramsBody : string = params["receipt-data"]
     //   console.log('Comparison')
@@ -75,7 +86,6 @@ const WebViewScreen: React.FC = () => {
       // console.log(params["receipt-data"])
 
       await finishTransaction({purchase: purchase, isConsumable: false});
-      // console.log("Return Params", params)
       return params
     } catch (error) {
       setIsLoading(false)
@@ -129,7 +139,7 @@ const WebViewScreen: React.FC = () => {
   
 
   const _onNavigationStateChange = async (event: WebViewMessageEvent) => {
-    console.log(event)
+    // console.log(event)
   }
   const handleWebViewMessageForSubscriptions = async (event: WebViewMessageEvent) => {
     try {

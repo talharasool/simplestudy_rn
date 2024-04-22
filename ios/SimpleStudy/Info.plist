@@ -69,7 +69,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
   <key>UIUserInterfaceStyle</key>
-  <string>light</string>
+  <string>Light</string>
   <key>UIViewControllerBasedStatusBarAppearance</key>
   <true/>
 </dict>
